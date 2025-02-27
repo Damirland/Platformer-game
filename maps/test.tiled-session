@@ -1,0 +1,47 @@
+{
+    "activeFile": "lvl1.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "Все файлы (*)",
+    "fileStates": {
+        "lvl1.tmx": {
+            "scale": 0.8015625,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 319.3762183235868,
+                "y": 160.31189083820664
+            }
+        },
+        "money.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "pixels.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "test.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 3
+        }
+    },
+    "last.imagePath": "C:/Users/dmura/PycharmProjects/Platformer/sprites/Coin_Gems",
+    "openFiles": [
+        "pixels.tsx",
+        "lvl1.tmx",
+        "money.tsx"
+    ],
+    "project": "test.tiled-project",
+    "recentFiles": [
+        "pixels.tsx",
+        "money.tsx",
+        "lvl1.tmx",
+        "test.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
