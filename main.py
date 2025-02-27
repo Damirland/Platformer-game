@@ -349,61 +349,65 @@ class Ball(pg.sprite.Sprite):
             self.kill()
 
 
-class Coin(pg.sprite.Sprite):
-    def __init__(self, x, y):
-        super(Coin, self).__init__()
-
-        self.load_animations()
-        self.image = self.images[0]
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-
-        self.current_image = 0
-        self.interval = 200
-        self.timer = pg.time.get_ticks()
-
-    def load_animations(self):
-        tile_size = 16
-        tile_scale = 3
-        self.images = []
-        num_images = 5
-        spritesheet = pg.image.load("sprites/Coin_Gems/MonedaD.png")
-
-        for i in range(num_images):
-            x = i * tile_size
-            y = 0
-            rect = pg.Rect(x, y, tile_size, tile_size)
-            image = spritesheet.subsurface(rect)
-            image = pg.transform.scale(image, (tile_size * tile_scale, tile_size * tile_scale))
-            self.images.append(image)
-
-    def update(self):
-        if pg.time.get_ticks() - self.timer > self.interval:
-            self.current_image += 1
-            if self.current_image >= len(self.images):
-                self.current_image = 0
-            self.image = self.images[self.current_image]
-            self.timer = pg.time.get_ticks()
+# class Coin(pg.sprite.Sprite):
+#     def __init__(self, x, y):
+#         super(Coin, self).__init__()
+#
+#         self.load_animations()
+#         self.image = self.images[0]
+#         self.rect = self.image.get_rect()
+#         self.rect.x = x
+#         self.rect.y = y
+#
+#         self.current_image = 0
+#         self.interval = 200
+#         self.timer = pg.time.get_ticks()
+#
+#     def load_animations(self):
+#         tile_size = 16
+#         tile_scale = 4
+#
+#         self.images = []
+#
+#         num_images = 5
+#         spritesheet = pg.image.load("sprites/Coin_Gems/MonedaD.png")
+#
+#         for i in range(num_images):
+#             x = i * tile_size
+#             y = 0
+#             rect = pg.Rect(x, y, tile_size, tile_size)
+#             image = spritesheet.subsurface(rect)
+#             image = pg.transform.scale(image, (tile_size * tile_scale, tile_size * tile_scale))
+#             self.images.append(image)
+#
+#     def update(self):
+#         if pg.time.get_ticks() - self.timer > self.interval:
+#             self.current_image += 1
+#             if self.current_image >= len(self.images):
+#                 self.current_image = 0
+#             self.image = self.images[self.current_image]
+#             self.timer = pg.time.get_ticks()
 
 
 class Game:
     def __init__(self):
         self.screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pg.display.set_caption("Платформер")
+
         self.setup()
 
     # noinspection PyAttributeOutsideInit
     def setup(self):
+        self.collected_coins = 0
+        self.mode = "game"
         self.clock = pg.time.Clock()
         self.is_running = False
+
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
         self.balls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
-
-        self.mode = ""
 
         self.tmx_map = pytmx.load_pygame("maps/lvl1.tmx")
 
@@ -428,26 +432,25 @@ class Game:
                 for x, y, gid in layer:
                     tile = self.tmx_map.get_tile_image_by_gid(gid)
 
-                    if tile:
-                        coin = Coin(x * self.tmx_map.tilewidth, y * self.tmx_map.tileheight * TILE_SCALE)
-                        self.all_sprites.add(coin)
-                        self.coins.add(coin)
+                    # if tile:
+                        # coin = Coin(x * self.tmx_map.tilewidth * TILE_SCALE, y * self.tmx_map.tileheight * TILE_SCALE)
+                        # self.all_sprites.add(coin)
+                        # self.coins.add(coin)
 
         with open("maps/level1_enemies.json", "r") as json_file:
             data = json.load(json_file)
 
         for enemy in data["enemies"]:
             if enemy["name"] == "Crab":
-
                 x1 = enemy["start_pos"][0] * TILE_SCALE * self.tmx_map.tilewidth
                 y1 = enemy["start_pos"][1] * TILE_SCALE * self.tmx_map.tilewidth
 
                 x2 = enemy["final_pos"][0] * TILE_SCALE * self.tmx_map.tilewidth
                 y2 = enemy["final_pos"][1] * TILE_SCALE * self.tmx_map.tilewidth
-
                 crab = Crab(self.map_pixel_width, self.map_pixel_height, [x1, y1], [x2, y2])
-                self.all_sprites.add(crab)
                 self.enemies.add(crab)
+                self.all_sprites.add(crab)
+
             elif enemy["name"] == "Onion":
 
                 x1 = enemy["start_pos"][0] * TILE_SCALE * self.tmx_map.tilewidth
@@ -458,7 +461,7 @@ class Game:
 
                 onion = Onion(self.map_pixel_width, self.map_pixel_height, [x1, y1], [x2, y2])
                 self.all_sprites.add(onion)
-                self.enemies.add(onion)
+                self.enemies.add(onion) 
 
         self.camera_x = 0
         self.camera_y = 0
@@ -481,7 +484,7 @@ class Game:
             if event.type == pg.QUIT:
                 self.is_running = False
             if event.type == pg.KEYDOWN:
-                if event.key == pg.K_f:
+                if event.key == pg.K_RETURN:  # нажатие на Enter (в pygame это pg.K_RETURN)
                     if self.player.current_animation in (
                             self.player.idle_animation_right, self.player.move_animation_right):
                         direction = "right"
@@ -495,6 +498,17 @@ class Game:
                 if event.type == pg.KEYDOWN:
                     self.setup()
 
+        keys = pg.key.get_pressed()
+
+        # if keys[pg.K_LEFT]:
+        #     self.camera_x += self.camera_speed
+        # if keys[pg.K_RIGHT]:
+        #     self.camera_x -= self.camera_speed
+        # if keys[pg.K_UP]:
+        #     self.camera_y += self.camera_speed
+        # if keys[pg.K_DOWN]:
+        #     self.camera_y -= self.camera_speed
+
     def update(self):
         if self.player.hp <= 0:
             self.mode = "game over"
@@ -503,14 +517,21 @@ class Game:
         for enemy in self.enemies.sprites():
             if pg.sprite.collide_mask(self.player, enemy):
                 self.player.get_damage()
+        if self.player.rect.top > self.tmx_map.width * self.tmx_map.tilewidth * TILE_SCALE:
+            self.player.hp = 0
 
         self.player.update(self.platforms)
-        self.balls.update()
-        pg.sprite.groupcollide(self.balls, self.enemies, True, True)
-        pg.sprite.groupcollide(self.balls, self.platforms, True, False)
-
         for enemy in self.enemies.sprites():
             enemy.update(self.platforms)
+        # добавлено
+        self.balls.update()
+        self.coins.update()
+
+        pg.sprite.groupcollide(self.balls, self.enemies, True, True)
+        pg.sprite.groupcollide(self.balls, self.platforms, True, False)
+        hits = pg.sprite.spritecollide(self.player, self.coins, True)
+        for hit in hits:
+            self.collected_coins += 1
 
         self.camera_x = self.player.rect.x - SCREEN_WIDTH // 2
         self.camera_y = self.player.rect.y - SCREEN_HEIGHT // 2
